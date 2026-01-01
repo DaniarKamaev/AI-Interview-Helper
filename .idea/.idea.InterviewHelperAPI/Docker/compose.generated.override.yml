@@ -1,0 +1,19 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  app:
+    build:
+      context: "/Users/a/RiderProjects/InterviewHelperAPI/InterviewHelperAPI"
+      dockerfile: "Dockerfile"
+      target: "build"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/InterviewHelperAPI.dll"
+    environment: {}
+    image: "interviewhelperapi:dev"
+    ports: []
+    volumes:
+    - "/Users/a/RiderProjects/InterviewHelperAPI/InterviewHelperAPI:/app:rw"
+    - "/Users/a/RiderProjects/InterviewHelperAPI:/src:rw"
+    - "/Users/a/.nuget/packages:/root/.nuget/packages"
+    working_dir: "/app"

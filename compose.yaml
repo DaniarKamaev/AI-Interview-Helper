@@ -1,0 +1,38 @@
+﻿services:
+  mysql:
+    image: mysql:8.0
+    container_name: Interview-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: HelperDb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 10
+
+  app:
+    build:
+      context: ./InterviewHelperAPI
+      dockerfile: Dockerfile
+    container_name: Interview-app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=HelperDb;user=root;password=rootpassword
+      - GigaChat__ClientId=******************************
+      - GigaChat__ClientSecret=*********************
+      - GigaChat__Scope=********
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
