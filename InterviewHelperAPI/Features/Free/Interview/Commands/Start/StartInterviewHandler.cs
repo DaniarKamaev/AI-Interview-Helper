@@ -65,8 +65,6 @@ public class StartInterviewHandler : IRequestHandler<StartInterviewCommand, Star
             
             _logger.LogInformation("Interview создан с ID {InterviewId}", interview.InterviewId);
             
-            // 3. Генерируем первый вопрос через GigaChat
-            // Сначала создаем контекст без сохранения в менеджере сессий
             var context = new InterviewContext
             {
                 InterviewId = interview.InterviewId,
@@ -100,7 +98,6 @@ public class StartInterviewHandler : IRequestHandler<StartInterviewCommand, Star
             
             await _dbContext.SaveChangesAsync(cancellationToken);
             
-            //регаем сессию в менеджере
             context.AddMessage("assistant", firstQuestion);
             await _sessionManager.RegisterSessionAsync(context);
             

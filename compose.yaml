@@ -23,9 +23,10 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=HelperDb;user=root;password=rootpassword
-      - GigaChat__ClientId=******************************
-      - GigaChat__ClientSecret=*********************
-      - GigaChat__Scope=********
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - GigaChat__ClientId=*****************
+      - GigaChat__ClientSecret=***********************
+      - GigaChat__Scope=*****************
     ports:
       - "8080:8080"
       - "8081:8081"
