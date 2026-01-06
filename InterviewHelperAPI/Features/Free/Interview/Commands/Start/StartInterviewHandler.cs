@@ -86,7 +86,7 @@ public class StartInterviewHandler : IRequestHandler<StartInterviewCommand, Star
                 InterviewId = interview.InterviewId,
                 QuestionText = firstQuestion,
                 QuestionType = "technical",
-                DifficultyLevel = "medium",
+                DifficultyLevel = request.JobLevel,
                 TurnNumber = 1,
                 AskedAt = DateTime.UtcNow
             };

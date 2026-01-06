@@ -51,14 +51,26 @@ public class UserResponseHandler : IRequestHandler<UserResponseCommand, UserResp
             }
 
 
-            var lastQuestion = interview.InterviewQuestions
-                .Where(q => q.AskedAt != null && !_db.UserResponses.Any(ur => ur.QuestionId == q.QuestionId))
-                .OrderByDescending(q => q.AskedAt)
-                .FirstOrDefault();
-
+            var lastQuestion = await _db.InterviewQuestions
+                .Where(q => q.InterviewId == interviewId)
+                .OrderByDescending(q => q.TurnNumber)
+                .Select(q => new
+                {
+                    q.QuestionId,
+                    q.TurnNumber,
+                    q.QuestionText,
+                    HasResponse = _db.UserResponses.Any(ur => ur.QuestionId == q.QuestionId)
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            
             if (lastQuestion == null)
             {
                 throw new Exception("Нет акивного интерьвю");
+            }
+            
+            if (lastQuestion.HasResponse)
+            {
+                throw new Exception("На последний вопрос уже получен ответ");
             }
 
             var context = await _sessionManager.GetSessionAsync((int)interviewId);
