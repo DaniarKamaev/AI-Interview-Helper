@@ -5,4 +5,5 @@ public record UserResponse(
     string? Feedback,
     List<string> DetectedSkills,
     List<string> ImprovementAreas,
-    string? NextQuestionHint);
+    string NextQuestionHint,
+    int? NextQuestionId = null);

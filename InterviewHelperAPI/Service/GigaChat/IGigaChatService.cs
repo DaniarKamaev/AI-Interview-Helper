@@ -13,6 +13,13 @@ public interface IGigaChatService
         string userAnswer, 
         InterviewContext context);
     
+    Task<string> GenerateQuestionFromHintAsync(
+        string jobDescription, 
+        string jobTitle, 
+        string jobLevel,
+        string hint,
+        InterviewContext? context);
+    
     Task<InterviewSummary> GenerateSummaryAsync(InterviewContext context);
     
     Task<string> GenerateHintAsync(string question, InterviewContext context);

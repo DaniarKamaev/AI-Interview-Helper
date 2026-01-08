@@ -111,41 +111,124 @@ public class GigaChatService : IGigaChatService
             throw new Exception($"Не удалось сгенерировать итоги: {ex.Message}");
         }
     }
-    
+
     public async Task<string> GenerateFeedbackAsync(string question, string userAnswer, InterviewContext context)
-{
-    try
     {
-        await EnsureValidTokenAsync();
-        
-        var messages = new List<GigaChatMessage>
+        try
         {
-            new GigaChatMessage
+            await EnsureValidTokenAsync();
+
+            var messages = new List<GigaChatMessage>
             {
-                Role = "system",
-                Content = $"Ты - рекрутер. Дай развернутую обратную связь по ответу.\n\n" +
-                         $"Вопрос: '{question}'\n" +
-                         $"Ответ кандидата: '{userAnswer}'\n\n" +
-                         "Структура фидбека:\n" +
-                         "1. Что было хорошо\n" +
-                         "2. Что можно улучшить\n" +
-                         "3. Конкретные рекомендации\n\n" +
-                         "Говори как человек, избегай шаблонных фраз. " +
-                         "Используй местоимение 'вы'. Верни только фидбек." +
-                         "Но ты должен быть человечным"
-            }
-        };
-        
-        return await SendChatRequestAsync(messages);
+                new GigaChatMessage
+                {
+                    Role = "system",
+                    Content = $"Ты - рекрутер. Дай развернутую обратную связь по ответу.\n\n" +
+                              $"Вопрос: '{question}'\n" +
+                              $"Ответ кандидата: '{userAnswer}'\n\n" +
+                              "Структура фидбека:\n" +
+                              "1. Что было хорошо\n" +
+                              "2. Что можно улучшить\n" +
+                              "3. Конкретные рекомендации\n\n" +
+                              "Говори как человек, избегай шаблонных фраз. " +
+                              "Используй местоимение 'вы'. Верни только фидбек." +
+                              "Но ты должен быть человечным"
+                }
+            };
+
+            return await SendChatRequestAsync(messages);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при генерации фидбека");
+            return "Хорошо, давайте попробуем другой пример из вашего практического опыта.";
+        }
     }
-    catch (Exception ex)
+
+    public async Task<string> GenerateQuestionFromHintAsync(
+        string jobDescription,
+        string jobTitle,
+        string jobLevel,
+        string hint,
+        InterviewContext? context)
     {
-        _logger.LogError(ex, "Ошибка при генерации фидбека");
-        return "Хорошо, давайте попробуем другой пример из вашего практического опыта.";
+        try
+        {
+            _logger.LogInformation("Генерация вопроса на основе подсказки для {JobTitle} ({JobLevel})", jobTitle,
+                jobLevel);
+
+            await EnsureValidTokenAsync();
+
+            var messages = BuildPromptForQuestionFromHint(jobDescription, jobTitle, jobLevel, hint, context);
+            var response = await SendChatRequestAsync(messages);
+
+            if (context != null)
+            {
+                context.AddMessage("assistant", response);
+            }
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при генерации вопроса из подсказки");
+            return $"Вопрос по {jobTitle} (уровень: {jobLevel}): {hint}";
+        }
     }
+
+    private List<GigaChatMessage> BuildPromptForQuestionFromHint(
+    string jobDescription,
+    string jobTitle,
+    string jobLevel,
+    string hint,
+    InterviewContext? context)
+{
+    var messages = new List<GigaChatMessage>();
+
+    string systemPrompt = $@"Ты - опытный рекрутер с 10+ годами опыта в IT.
+    Проводишь собеседование на позицию: {jobTitle} ({jobLevel} уровень).
+    
+    Описание вакансии:
+    {jobDescription}
+    
+    У тебя есть подсказка для следующего вопроса: {hint}
+    
+    На основе этой подсказки сформулируй конкретный технический вопрос.
+    
+    Правила:
+    1. Преврати подсказку в полноценный вопрос
+    2. Вопрос должен быть релевантен вакансии и уровню
+    3. Фокусируйся на практическом опыте
+    4. Вопрос должен проверить конкретный навык
+    5. Верни ТОЛЬКО вопрос, без пояснений
+    ";
+
+    messages.Add(new GigaChatMessage { Role = "system", Content = systemPrompt });
+
+    // Добавляем историю диалога
+    if (context != null && context.ConversationHistory.Any())
+    {
+        var recentHistory = context.ConversationHistory
+            .TakeLast(4)
+            .Select(m => new GigaChatMessage
+            {
+                Role = m.Role,
+                Content = m.Content
+            });
+
+        messages.AddRange(recentHistory);
+    }
+
+    messages.Add(new GigaChatMessage
+    {
+        Role = "user",
+        Content = "Сформулируй вопрос на основе подсказки."
+    });
+
+    return messages;
 }
 
-    private async Task<string> SendChatRequestAsync(List<GigaChatMessage> messages)
+private async Task<string> SendChatRequestAsync(List<GigaChatMessage> messages)
     {
         var httpClient = _httpClientFactory.CreateClient("GigaChat");
         

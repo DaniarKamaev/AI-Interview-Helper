@@ -86,7 +86,7 @@ public class StartInterviewHandler : IRequestHandler<StartInterviewCommand, Star
                 InterviewId = interview.InterviewId,
                 QuestionText = firstQuestion,
                 QuestionType = "technical",
-                DifficultyLevel = request.JobLevel,
+                DifficultyLevel = "medium",
                 TurnNumber = 1,
                 AskedAt = DateTime.UtcNow
             };
@@ -106,6 +106,7 @@ public class StartInterviewHandler : IRequestHandler<StartInterviewCommand, Star
             return new StartInterviewResponse(
                 interview.InterviewId,
                 firstQuestion,
+                question.QuestionId,
                 interview.StartedAt ?? DateTime.UtcNow);
         }
         catch (Exception ex)
