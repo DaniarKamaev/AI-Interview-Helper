@@ -1,4 +1,4 @@
-﻿services:
+﻿ services:
   mysql:
     image: mysql:8.0
     container_name: Interview-mysql
@@ -24,8 +24,8 @@
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=HelperDb;user=root;password=rootpassword
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - GigaChat__ClientId=************************
-      - GigaChat__ClientSecret=*************************
+      - GigaChat__ClientId=********************
+      - GigaChat__ClientSecret=***************************
       - GigaChat__Scope=GIGACHAT_API_PERS
     ports:
       - "8080:8080"

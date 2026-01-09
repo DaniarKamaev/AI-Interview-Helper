@@ -3,6 +3,7 @@ using InterviewHelperAPI;
 using InterviewHelperAPI.Features.Auth.Auth;
 using InterviewHelperAPI.Features.Auth.Registration;
 using InterviewHelperAPI.Features.Free.Interview.Commands;
+using InterviewHelperAPI.Features.Free.Interview.Commands.GetAllInterview;
 using InterviewHelperAPI.Features.Free.Interview.Commands.UserResponse;
 using InterviewHelperAPI.Features.Free.Interview.Commands.UserResponse.Db;
 using InterviewHelperAPI.Service.GigaChat;
@@ -126,6 +127,7 @@ app.RegistationMap();
 app.AuthMap();
 app.StartInterviewMap();
 app.UserResponseMap();
+app.GetInterviewMap();
 
 app.MapGet("/", () => "Interview Helper API is running!");
 app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
